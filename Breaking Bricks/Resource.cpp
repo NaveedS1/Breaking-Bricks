@@ -6,27 +6,63 @@ Resource::Resource()
 	{
 		std::cout << "Couldn't load font\n";
 	}
-	this->playerScorce = 0;
+	this->playerScore = 0;
+	this->playerLives = PLAYER_DEFAULT_LIVES;
 	text.setPosition(sf::Vector2f(10, 550));
 	text.setFont(font);
 	text.setScale(sf::Vector2f(0.6, 0.6));
+
+	/*if (!buffer1.loadFromFile("../Resource/bounce.wav"))
+	{
+		std::cout << " Error load sound effect 1\n";
+	}*/
 }
 
 Resource::~Resource()
 {
 }
 
-void Resource::updateScore(int point)
+void Resource::addScore(int point)
 {
-	playerScorce += point;
+	playerScore += point;
 }
+
+//void Resource::playBallHitsBricksSound()
+//{
+//	sound.setBuffer(buffer1);
+//	sound.play();
+//}
 
 void Resource::update()
 {
-	text.setString("Player : " + std::to_string(this->playerScorce));
+	// den måste anropas också
+	text.setString("Players score : " + std::to_string(this->playerScore) + "\n" +
+		"Lives : " + std::to_string(this->playerLives)); 
 }
 
-void Resource::draw(sf::RenderWindow & renWindow)
+void Resource::reset()
+{
+	this->playerScore = 0;
+	this->playerLives = PLAYER_DEFAULT_LIVES;
+	update();
+}
+
+void Resource::removeLife()
+{
+	playerLives--;
+}
+
+int Resource::getLives() const 
+{
+	return playerLives;
+}
+
+int Resource::getScore() const
+{
+	return this->playerScore;
+}
+
+void Resource::draw(sf::RenderWindow & renWindow) const
 {
 	renWindow.draw(text);
 }

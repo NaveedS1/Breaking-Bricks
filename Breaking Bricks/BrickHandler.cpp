@@ -1,10 +1,13 @@
 #include "BrickHandler.h"
 
-BrickHandler::BrickHandler(int windowSizeX) : windowSizeX(windowSizeX) {
+BrickHandler::BrickHandler(int windowSizeX, Resource &score, SoundEffects &sound) 
+	: windowSizeX(windowSizeX), score(&score), sound(&sound)
+{
 	initializeBricks(windowSizeX);
 }
 
-void BrickHandler::initializeBricks(int windowSizeX) {
+void BrickHandler::initializeBricks(int windowSizeX) 
+{
 	const int brickMargin = 2; // pixels between the bricks
 
 	// calculate list size
@@ -19,7 +22,8 @@ void BrickHandler::initializeBricks(int windowSizeX) {
 	setBrickPositions();
 }
 
-void BrickHandler::setBrickPositions() {
+void BrickHandler::setBrickPositions() 
+{
 	int offsetX = (/*(*/windowSizeX /*- (windowSizeX / WIDTH) * brickMargin)*/ % WIDTH) / 2 + 1; // offset x in pixels
 	int offsetY = offsetX; // offset y in pixels
 
@@ -27,47 +31,50 @@ void BrickHandler::setBrickPositions() {
 	int i = 0;
 	for (int y = 0; y < HEIGHT; y++) {
 		for (int x = 0; x < windowSizeX / WIDTH; x++) {
-			brickList[i].isDestroyed = false;
-			brickList[i++].setPosition(x * WIDTH /*+ x * THICKNESS*/ + offsetX, y * HEIGHT + /*y * THICKNESS*/ + offsetY);
+			brickList[i].setIsDestroyed(false);
+			
+			brickList[i++].setPosition2(x * WIDTH /*+ x * THICKNESS*/ + offsetX, y * HEIGHT + /*y * THICKNESS*/ + offsetY);
 		}
 	}
 }
 
-void BrickHandler::draw(sf::RenderWindow &window) {
+void BrickHandler::draw(sf::RenderWindow &window) 
+{
 	for (int i = 0; i < brickListSize; i++)
 	{
-		if (!brickList[i].isDestroyed)
+		if (!brickList[i].getIsDestroyed())
 		{
 			brickList[i].draw(window);
 		}
 	}
 }
 
-void BrickHandler::update(Ball &ball) {
+void BrickHandler::update(Entity &entity)
+{
 	for (int i = 0; i < brickListSize; i++)
 	{
-		if (!brickList[i].isDestroyed)
+		if (!brickList[i].getIsDestroyed())
 		{
-			// confirm it intersects...
-			if (intersects(brickList[i].xPosition(), brickList[i].yPosition(), WIDTH, HEIGHT, ball.x(), ball.y(), ball.getRadius(), ball.getRadius()))
+			if (entity.intersects(brickList[i]))
 			{
-				// check whether Y intersect
-				if (intersectsY(brickList[i].yPosition(), HEIGHT, ball.y(), ball.getRadius()))
+				if (entity.getPosition().x < brickList[i].getPosition().x + brickList[i].width()
+					&& entity.getPosition().x + entity.getSize().x >= brickList[i].getPosition().x)
 				{
-					ball.setVelocityY(ball.getVelocityY() * -1);
+					entity.changeVelocityX();
 				}
-
-				// check whether X intersect
-				if (intersectsX(brickList[i].xPosition(), WIDTH, ball.x(), ball.getRadius())
-					&& !(WIDTH - (WIDTH / 10) + (WIDTH / 5)))
+					
+				if (entity.getPosition().y < brickList[i].getPosition().y + brickList[i].height()
+					&& entity.getPosition().y + entity.getSize().y >= brickList[i].getPosition().y)
 				{
-					ball.setVelocityX(ball.getVelocityX() * -1);
+					entity.changeVelocityY();
 				}
 
 				// set destroyed and then break the for-loop
-				score.updateScore(50);
-				brickList[i].isDestroyed = true;
-				break;
+				brickList[i].setIsDestroyed(true);
+				score->addScore(10);
+				sound->playBounceBallSound();
+
+				i = 0; // continue
 			}
 		}
 	}
@@ -78,24 +85,8 @@ void BrickHandler::resetGame()
 	setBrickPositions();
 }
 
-bool BrickHandler::intersects(float rectX, float rectY, int rectW, int rectH, float ballX, float ballY, int ballW, int ballH) {
-	return ballX < rectX + rectW &&
-		ballX + ballW > rectX &&
-		ballY < rectY + rectH &&
-		ballY + ballH > rectY;
-	
-}
-
-bool BrickHandler::intersectsX(float rectX, int rectW, float ballX, int ballW) {
-	return ballX < rectX + rectW &&
- 		ballX + ballW > rectX;
-}
-
-bool BrickHandler::intersectsY(float rectY, int rectH, float ballY, int ballH) {
-	return ballY < rectY + rectH &&
-		ballY + ballH > rectY;
-}
-
 BrickHandler::~BrickHandler() {
 	delete[] this->brickList;
+	// delete[] this->score;
+	delete[] this->sound;
 }

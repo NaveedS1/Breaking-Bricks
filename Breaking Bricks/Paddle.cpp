@@ -1,31 +1,42 @@
 #include "Paddle.h"
 
-Paddle::Paddle(/*float startX, float startY*/)
+Paddle::Paddle()
+{
+	createPaddle();
+}
+
+Paddle::Paddle(unsigned int windowWidth, unsigned int windowHeight) : Entity(windowWidth, windowHeight)
+{
+	createPaddle();
+}
+
+void Paddle::createPaddle()
 {
 	setDefColor(sf::Color::Green);
 	rect.setOrigin(rect.getSize().x / 2, rect.getSize().y / 2);
 	rect.setSize({ rectWidth, rectHeight });
-	setVelocity(sf::Vector2f{ -rectVelocity, -rectVelocity });
+	reset();
 }
 
-void Paddle::draw(sf::RenderWindow & Window)
+void Paddle::draw(sf::RenderWindow & window)
 {
-	Window.draw(rect);
+	window.draw(rect);
 }
 
 void Paddle::update()
 {
-	rect.move(getVelocity());
-    
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)
 		&& getPositionEDGELEFTX() > -rect.getSize().x / 2)
-		setVelocityX(-rectVelocity);
-		//velocity.x = -rectVelocity;
+	{
+		setPositionX(getPosition().x - paddleSpeed);
+		rect.move(sf::Vector2f(-paddleSpeed, 0));
+	}
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)
-		&& getPositionEDGERIGHTX() < getWindowWidth() - rect.getSize().x / 2)//
-		//velocity.x = rectVelocity;
-		setVelocityX(rectVelocity);
-	
+		&& getPositionEDGERIGHTX() < getWindowWidth() - rect.getSize().x / 2)
+	{
+		setPositionY(getPosition().x + paddleSpeed);
+		rect.move(sf::Vector2f(paddleSpeed, 0));
+	}
 }
 
 void Paddle::setPosition(float x, float y)
@@ -33,6 +44,11 @@ void Paddle::setPosition(float x, float y)
 	DTPositionX = x;
 	DTPositionY = y;
 	rect.setPosition(sf::Vector2f(x, y));
+}
+
+sf::Vector2f Paddle::getPosition() const
+{
+	return sf::Vector2f(rect.getPosition());
 }
 
 bool Paddle::isWithinBounds()
@@ -112,4 +128,24 @@ float Paddle::getPositionEDGELEFTX()
 float Paddle::getPositionEDGEDOWNY()
 {
 	return (rect.getPosition().y + rect.getSize().y / 2);
+}
+
+float Paddle::getCenterPositionX()
+{
+	return rect.getPosition().x;
+}
+
+float Paddle::getRectWidth()
+{
+	return rectWidth;
+}
+
+float Paddle::getRectHeight()
+{
+	return rectHeight;
+}
+
+void Paddle::reset()
+{
+	rect.setPosition(getWindowWidth() / 2 - getRectWidth() / 2, getWindowHeight() - getRectHeight());
 }

@@ -6,32 +6,37 @@
 #include "Entity.h"
 class Brick : public Entity
 {
+private:
+	sf::RectangleShape brick;
+	sf::Color defColor{ sf::Color::Yellow };
+	sf::Color defColorOutLine{ sf::Color::Green };
+	sf::Vector2f position;
+	bool isDestroyed;
 public:
 	Brick();
 	Brick(float outlineThickness, float width, float height);
 	Brick(const Brick& oBrick) = default;
 	Brick& operator=(const Brick& oBricks);
 
-	float xPosition() { return brick.getPosition().x; }
-	float yPosition() { return brick.getPosition().y; }
-	float width() { return brick.getSize().x; }
-	float height() { return brick.getSize().y; }
-	float right() { return xPosition() + width() / 2.f; }
-	float left() { return xPosition() - width() / 2.f; }
-	float top() { return yPosition() - height() / 2.f; }
-	float bottom() { return yPosition() + height() / 2.f; }
+	//void setPosition(const float x, const float y);
+	/*float xPosition() const;
+	float yPosition() const;*/
+	float width() const;
+	float height() const;
+	float right() const;
+	float left() const;
+	float top() const;
+	float bottom() const;
 	
-	bool isDestroyed = false;
+	void setIsDestroyed(bool destroyed);
+	bool getIsDestroyed() const;
 
-	void draw(sf::RenderWindow &Window) { Window.draw(brick); }
-	float getCenterPositionX() { return brick.getPosition().x; }
-	void setPosition(float x, float y);
+	void draw(sf::RenderWindow &Window);
+	float getCenterPositionX() const;
+	void setPosition2(float x, float y);
+	sf::Vector2f getPosition2() const;
 	bool collision(sf::CircleShape &ball);
 	~Brick();
-private:
-	sf::RectangleShape brick;
-	sf::Color defColor{ sf::Color::Yellow };
-	sf::Color defColorOutLine{ sf::Color::Green };
 };
 #endif // !BRICK_H
 

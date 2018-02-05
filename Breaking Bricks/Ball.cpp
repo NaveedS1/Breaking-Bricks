@@ -1,15 +1,21 @@
 #include "Ball.h"
 
 Ball::Ball()
-{ 
-	ball.setPosition(startX, startY);
-	ball.setRadius(ballRadius);
-	setDefColor(sf::Color::Green);
-	setVelocity(sf::Vector2f { -ballVelocity, -ballVelocity });
+{
+	createBall();
 }
 
-Ball::~Ball()
+Ball::Ball(unsigned int windowWidth, unsigned int windowHeight) : Entity(windowWidth, windowHeight)
 {
+	createBall();
+}
+
+void Ball::createBall()
+{
+	ball.setRadius(ballRadius);
+	setSize(sf::Vector2<int>(ballRadius * 2, ballRadius * 2));
+	setDefColor(sf::Color::Green);
+	reset();
 }
 
 bool Ball::update(Paddle &paddle)
@@ -19,67 +25,64 @@ bool Ball::update(Paddle &paddle)
 	sloveBoundCollisions();*/
 
 	// check if ball hits the paddle
-	if (this->x() > paddle.getX()
-		&& this->x() + this->getRadius() < paddle.getX() + paddle.getRectWidth()
-		&& this->y() + this->getRadius() * 2 > paddle.getY())
+	if (ball.getPosition().x > paddle.getPosition().x
+		&& ball.getPosition().x + this->getRadius() < paddle.getPosition().x + paddle.getRectWidth()
+		&& ball.getPosition().y + this->getRadius() * 2 > paddle.getPosition().y)
 	{
-		setVelocityY(getVelocityY() * -1); // redirect balls velocity y by *-1
+		changeVelocityY(); // redirect balls velocity y by *-1
 	}
 	else if (this->bottom() > getWindowHeight()) // player did not hit paddle and lost
 	{
 		playerSurvive = false;
 	}
-
-	ball.move(getVelocity());
-	
-	if (left() < 0)
+	else if (top() < 0)
 	{
-		setVelocityX(ballVelocity);
-	}
-	else if (right() > getWindowWidth())
-	{
-		setVelocityX(-ballVelocity);
-	}
-	if (top() < 0)
-	{
-		setVelocityY(ballVelocity);
+		changeVelocityY();
 	}
 	else if (bottom() > getWindowHeight())
 	{
-		setVelocityY(-ballVelocity);
+		changeVelocityY();
+	}
+	
+	if (left() < 0)
+	{
+		changeVelocityX();
+	}
+	else if (right() > getWindowWidth())
+	{
+		changeVelocityX();
 	}
 
+	moveBall();
+	
 	return playerSurvive;
 }
 
-float Ball::x()
+void Ball::moveBall()
 {
-	return ball.getPosition().x; 
-}
+	ball.setPosition(ball.getPosition().x + getVelocityX(), ball.getPosition().y + getVelocityY());
 
-float Ball::y()
-{
-	return ball.getPosition().y;
+	setPosition(ball.getPosition().x, ball.getPosition().y);
 }
 
 float Ball::right()
 {
-	return x() + getRadius() * 2;
+	return ball.getPosition().x + getRadius() * 2;
 }
 
 float Ball::left()
 {
-	return x();
+	return ball.getPosition().x;
 }
 
 float Ball::bottom()
 {
-	return y() + getRadius() * 2;
+	return ball.getPosition().y + getRadius() * 2;
 }
 
 float Ball::top()
 {
-	return y();
+	return ball.getPosition().y;
 }
 
 float Ball::getCirclePositionX()
@@ -92,19 +95,9 @@ float Ball::getCircleRadius()
 	return getRadius();
 }
 
-sf::CircleShape Ball::getBall()
+void Ball::draw(sf::RenderWindow & window)
 {
-	 return ball;
-}
-
-void Ball::draw(sf::RenderWindow & Window)
-{
-	Window.draw(ball);
-}
-
-void Ball::setPosition(float x, float y)
-{
-	ball.setPosition(x, y);
+	window.draw(ball);
 }
 
 float Ball::getRadius() const
@@ -112,16 +105,17 @@ float Ball::getRadius() const
 	return ballRadius;
 }
 
-bool Ball::testBottomCollision(Ball & mBall)
+bool Ball::testBottomCollision()
 {
-	if (mBall.y() >= getWindowWidth() - ballRadius)
+	if (ball.getPosition().y >= getWindowWidth() - ballRadius)
 		return true;
 	else
 		return false;
 }
 
-float Ball::getBallVelocity()
+void Ball::reset()
 {
-	return ballVelocity;
+	ball.setPosition(getWindowWidth() / 2 - getRadius(), getWindowHeight() - getRadius() - 100);
+	setPosition(ball.getPosition().x, ball.getPosition().y);
+	setDefaultVelocity(-defaultVelocity, -defaultVelocity);
 }
-

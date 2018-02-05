@@ -4,11 +4,21 @@
 #include "Brick.h"
 #include "Ball.h"
 #include "Resource.h"
+#include "Entity.h"
+#include "SoundEffects.h"
 #include <SFML\Graphics.hpp>
+#include <SFML\Audio.hpp>
 
-class BrickHandler {
+class BrickHandler 
+{
+private:
+	Brick *brickList;
+	int windowSizeX;
+	int brickListSize;
+	Resource *score;
+	SoundEffects *sound;
 public:
-	BrickHandler(int windowSizeX);
+	BrickHandler(int windowSizeX, Resource &score, SoundEffects &sound);
 	~BrickHandler();
 
 	const float THICKNESS = 2.f;
@@ -18,18 +28,9 @@ public:
 	void initializeBricks(int windowSizeX);
 	void setBrickPositions();
 	void draw(sf::RenderWindow &Window);
-	void update(Ball &ball);
+	void update(Entity &entity);
 	void resetGame();
 
-private:
-	Brick *brickList;
-	int windowSizeX,
-		brickListSize;
-	Resource score;
-
-	bool intersectsX(float rectX, int rectW, float ballX, int ballW);
-	bool intersectsY(float rectY, int rectH, float ballY, int ballH);
-	bool intersects(float rectX, float rectY, int rectW, int rectH, float ballX, float ballY, int ballW, int ballH);
 };
 
 #endif // !BRICK_HANDLER_H

@@ -8,20 +8,21 @@
 #include "Paddle.h"
 #include "BrickHandler.h"
 #include "Resource.h"
+#include "SoundEffects.h"
 
 class GameEngine
 {
 private:
-	
+	int highScore[10];
 	Ball ball; 
 	Paddle paddle;
 	Resource score;
+	SoundEffects sound;
 public:
 	GameEngine();
 	~GameEngine();
 	
 	void run();
-	void canPaddleMove(float rectVelocity);
 	
 	void upadteWindow(sf::RenderWindow &window, float rectVelocity);
 
